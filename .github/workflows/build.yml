@@ -1,0 +1,30 @@
+name: Build iOS Dylib
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Environment
+      run: |
+        echo "Setting up build environment..."
+        # هنا يمكنك إضافة أوامر التجميع الخاصة بـ Theos أو Clang
+
+    - name: Compile Source Code
+      run: |
+        # مثال لتجميع ملف الـ dylib إذا كان الكود بلغة C/Objective-C
+        clang -dynamiclib -framework UIKit -framework Foundation -o FinxModMenu.dylib main.m
+        
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Compiled-Dylib
+        path: FinxModMenu.dylib
