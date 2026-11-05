@@ -56,24 +56,33 @@
         rootVC.view.backgroundColor = [UIColor clearColor];
         floatingWindow.rootViewController = rootVC;
         
-        // زر الفينكس العائم (مع تفعيل السحب الصحيح 100%)
+        // زر الفينكس العائم بالصورة الفخمة وقابل للتحريك
         UIButton *floatingBtn = [UIButton buttonWithType:UIButtonTypeCustom];
         floatingBtn.frame = CGRectMake(30, 100, 55, 55);
         floatingBtn.backgroundColor = [UIColor colorWithRed:0.06 green:0.09 blue:0.11 alpha:0.95];
-        [floatingBtn setTitle:@"FINX" forState:UIControlStateNormal];
-        [floatingBtn setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] forState:UIControlStateNormal];
-        floatingBtn.titleLabel.font = [UIFont boldSystemFontOfSize:13];
         floatingBtn.layer.cornerRadius = 27.5;
+        floatingBtn.layer.masksToBounds = YES;
         floatingBtn.layer.borderColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0].CGColor;
         floatingBtn.layer.borderWidth = 2.0;
         
-        // إيماءة السحب للزر العائم
+        // تحميل الصورة داخل الزر العائم
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            NSData *imgData = [NSData dataWithContentsOfURL:[NSURL URLWithString:@"https://i.ibb.co/3s6Q1Q9/image.png"][span_0](start_span)[span_0](end_span)];
+            if (imgData) {
+                UIImage *btnImage = [UIImage imageWithData:imgData];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [floatingBtn setImage:btnImage forState:UIControlStateNormal];
+                    floatingBtn.imageView.contentMode = UIViewContentModeScaleAspectFill;
+                });
+            }
+        });
+        
         UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(dragButton:)];
         [floatingBtn addGestureRecognizer:pan];
         [floatingBtn addTarget:self action:@selector(toggleMenu) forControlEvents:UIControlEventTouchUpInside];
         [rootVC.view addSubview:floatingBtn];
         
-        // إطار القائمة الرئيسية (مع إمكانية سحبها أيضاً من الأعلى)
+        // إطار القائمة الرئيسية
         modMenu = [[UIView alloc] initWithFrame:CGRectMake(95, 100, 320, 420)];
         modMenu.backgroundColor = [UIColor colorWithRed:0.05 green:0.07 blue:0.09 alpha:0.97];
         modMenu.layer.cornerRadius = 16;
@@ -81,7 +90,7 @@
         modMenu.layer.borderColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:0.4].CGColor;
         modMenu.hidden = YES;
         
-        // شريط عنوان القائمة (مخصص لسحب القائمة بالكامل)
+        // شريط عنوان القائمة (قابل للسحب)
         UILabel *title = [[UILabel alloc] initWithFrame:CGRectMake(15, 12, 200, 24)];
         title.text = @"FINX PRO MENU";
         title.textColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0];
@@ -217,20 +226,16 @@
     [btnMiscTab setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] forState:UIControlStateNormal];
 }
 
-// دالة سحب الزر العائم وتحديث إحداثياته بسلاسة
 - (void)dragButton:(UIPanGestureRecognizer *)p {
     UIView *btn = p.view;
     CGPoint translation = [p translationInView:btn.superview];
-    CGPoint newCenter = CGPointMake(btn.center.x + translation.x, btn.center.y + translation.y);
-    btn.center = newCenter;
+    btn.center = CGPointMake(btn.center.x + translation.x, btn.center.y + translation.y);
     [p setTranslation:CGPointZero inView:btn.superview];
 }
 
-// دالة سحب القائمة الرئيسية من شريط العنوان
 - (void)dragMenu:(UIPanGestureRecognizer *)p {
     CGPoint translation = [p translationInView:modMenu.superview];
-    CGPoint newCenter = CGPointMake(modMenu.center.x + translation.x, modMenu.center.y + translation.y);
-    modMenu.center = newCenter;
+    modMenu.center = CGPointMake(modMenu.center.x + translation.x, modMenu.center.y + translation.y);
     [p setTranslation:CGPointZero inView:modMenu.superview];
 }
 
