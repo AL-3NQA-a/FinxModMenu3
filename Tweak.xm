@@ -8,8 +8,8 @@
 @implementation FinxModMenu {
     UIWindow *floatingWindow;
     UIView *modMenu;
-    UIView *tabAimbot, *tabVisuals, *tabMisc;
-    UIButton *btnAimbotTab, *btnVisualsTab, *btnMiscTab;
+    UIView *tabMain, *tabVisuals, *tabMisc;
+    UIButton *btnMainTab, *btnVisualsTab, *btnMiscTab;
 }
 
 + (instancetype)sharedInstance {
@@ -25,216 +25,196 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         if (floatingWindow) return;
         
-        // النافذة المعائمة
-        floatingWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-        floatingWindow.windowLevel = UIWindowLevelAlert + 100;
+        // التعامل مع نافذة الشاشة الحديثة
+        UIWindowScene *scene = nil;
+        for (UIScene *s in [UIApplication sharedApplication].connectedScenes) {
+            if ([s isKindOfClass:[UIWindowScene class]]) {
+                scene = (UIWindowScene *)s;
+                break;
+            }
+        }
+        
+        if (scene) {
+            floatingWindow = [[UIWindowSceneWindow alloc] initWithWindowScene:scene];
+        } else {
+            floatingWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+        }
+        
+        floatingWindow.windowLevel = UIWindowLevelAlert + 99999;
         floatingWindow.backgroundColor = [UIColor clearColor];
         
         UIViewController *rootVC = [[UIViewController alloc] init];
         rootVC.view.backgroundColor = [UIColor clearColor];
         floatingWindow.rootViewController = rootVC;
         
-        // الزر العائم (FINX)
+        // زر الفينكس العائم (قابل للتحريك)
         UIButton *floatingBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        floatingBtn.frame = CGRectMake(30, 100, 60, 60);
+        floatingBtn.frame = CGRectMake(30, 100, 55, 55);
         floatingBtn.backgroundColor = [UIColor colorWithRed:0.06 green:0.09 blue:0.11 alpha:0.95];
         [floatingBtn setTitle:@"FINX" forState:UIControlStateNormal];
         [floatingBtn setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] forState:UIControlStateNormal];
-        floatingBtn.titleLabel.font = [UIFont boldSystemFontOfSize:14];
-        floatingBtn.layer.cornerRadius = 30;
+        floatingBtn.titleLabel.font = [UIFont boldSystemFontOfSize:13];
+        floatingBtn.layer.cornerRadius = 27.5;
         floatingBtn.layer.borderColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0].CGColor;
         floatingBtn.layer.borderWidth = 2.0;
         
-        UIPanGestureRecognizer *panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleDrag:)];
-        [floatingBtn addGestureRecognizer:panGesture];
+        UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(dragButton:)];
+        [floatingBtn addGestureRecognizer:pan];
         [floatingBtn addTarget:self action:@selector(toggleMenu) forControlEvents:UIControlEventTouchUpInside];
         [rootVC.view addSubview:floatingBtn];
         
-        // لوحة القائمة الرئيسية
-        modMenu = [[UIView alloc] initWithFrame:CGRectMake(100, 100, 330, 480)];
-        modMenu.backgroundColor = [UIColor colorWithRed:0.05 green:0.07 blue:0.09 alpha:0.96];
-        modMenu.layer.cornerRadius = 14;
-        modMenu.layer.borderWidth = 1.0;
-        modMenu.layer.borderColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:0.35].CGColor;
+        // إطار القائمة الرئيسية
+        modMenu = [[UIView alloc] initWithFrame:CGRectMake(95, 100, 320, 420)];
+        modMenu.backgroundColor = [UIColor colorWithRed:0.05 green:0.07 blue:0.09 alpha:0.97];
+        modMenu.layer.cornerRadius = 16;
+        modMenu.layer.borderWidth = 1.2;
+        modMenu.layer.borderColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:0.4].CGColor;
         modMenu.hidden = YES;
         
-        // Header
-        UIView *header = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 330, 45)];
-        header.backgroundColor = [UIColor colorWithRed:0.03 green:0.05 blue:0.06 alpha:0.9];
+        // عنوان القائمة
+        UILabel *title = [[UILabel alloc] initWithFrame:CGRectMake(15, 12, 200, 24)];
+        title.text = @"FINX PRO MENU";
+        title.textColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0];
+        title.font = [UIFont boldSystemFontOfSize:15];
+        [modMenu addSubview:title];
         
-        UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(16, 12, 250, 20)];
-        titleLabel.attributedText = [self createStyledTitle];
-        [header addSubview:titleLabel];
-        
+        // زر الإغلاق (X)
         UIButton *closeBtn = [UIButton buttonWithType:UIButtonTypeSystem];
-        closeBtn.frame = CGRectMake(288, 10, 26, 26);
+        closeBtn.frame = CGRectMake(280, 12, 26, 26);
         [closeBtn setTitle:@"✕" forState:UIControlStateNormal];
         [closeBtn setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
-        closeBtn.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.05];
-        closeBtn.layer.cornerRadius = 13;
         [closeBtn addTarget:self action:@selector(toggleMenu) forControlEvents:UIControlEventTouchUpInside];
-        [header addSubview:closeBtn];
-        [modMenu addSubview:header];
+        [modMenu addSubview:closeBtn];
         
-        // Tab Bar
-        UIView *tabBar = [[UIView alloc] initWithFrame:CGRectMake(0, 45, 330, 36)];
-        tabBar.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.3];
+        // شريط التنقل بين الأقسام (Tabs)
+        UIView *tabBar = [[UIView alloc] initWithFrame:CGRectMake(15, 48, 290, 34)];
+        tabBar.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.04];
+        tabBar.layer.cornerRadius = 8;
         
-        btnAimbotTab = [self createTabButton:@"AIMBOT" frame:CGRectMake(0, 0, 110, 36) action:@selector(showAimbotTab)];
-        btnVisualsTab = [self createTabButton:@"VISUALS" frame:CGRectMake(110, 0, 110, 36) action:@selector(showVisualsTab)];
-        btnMiscTab = [self createTabButton:@"MISC" frame:CGRectMake(220, 0, 110, 36) action:@selector(showMiscTab)];
+        btnMainTab = [self createTabBtn:@"AIMBOT" frame:CGRectMake(0, 0, 96, 34) action:@selector(showMain)];
+        btnVisualsTab = [self createTabBtn:@"ESP & VISUALS" frame:CGRectMake(96, 0, 98, 34) action:@selector(showVisuals)];
+        btnMiscTab = [self createTabBtn:@"MISC" frame:CGRectMake(194, 0, 96, 34) action:@selector(showMisc)];
         
-        [btnAimbotTab setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] forState:UIControlStateNormal];
+        [btnMainTab setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] forState:UIControlStateNormal];
         
-        [tabBar addSubview:btnAimbotTab];
+        [tabBar addSubview:btnMainTab];
         [tabBar addSubview:btnVisualsTab];
         [tabBar addSubview:btnMiscTab];
         [modMenu addSubview:tabBar];
         
-        // Content Area
-        UIView *contentArea = [[UIView alloc] initWithFrame:CGRectMake(14, 95, 302, 370)];
+        // محتوى الأقسام
+        UIView *container = [[UIView alloc] initWithFrame:CGRectMake(15, 92, 290, 310)];
         
-        tabAimbot = [self createAimbotContent];
-        tabVisuals = [self createVisualsContent];
+        tabMain = [self createMainTabContent];
+        tabVisuals = [self createVisualsTabContent];
         tabVisuals.hidden = YES;
-        tabMisc = [self createMiscContent];
+        tabMisc = [self createMiscTabContent];
         tabMisc.hidden = YES;
         
-        [contentArea addSubview:tabAimbot];
-        [contentArea addSubview:tabVisuals];
-        [contentArea addSubview:tabMisc];
-        [modMenu addSubview:contentArea];
+        [container addSubview:tabMain];
+        [container addSubview:tabVisuals];
+        [container addSubview:tabMisc];
+        [modMenu addSubview:container];
         
         [rootVC.view addSubview:modMenu];
         [floatingWindow makeKeyAndVisible];
+        floatingWindow.hidden = NO;
     });
 }
 
-- (NSAttributedString *)createStyledTitle {
-    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:@"FINX PRO ENGINE"];
-    [str addAttribute:NSForegroundColorAttributeName value:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] range:NSMakeRange(0, 4)];
-    [str addAttribute:NSForegroundColorAttributeName value:[UIColor whiteColor] range:NSMakeRange(4, 11)];
-    return str;
-}
-
-- (UIButton *)createTabButton:(NSString *)title frame:(CGRect)frame action:(SEL)action {
+// دالة إنشاء أزرار التنقل
+- (UIButton *)createTabBtn:(NSString *)title frame:(CGRect)frame action:(SEL)action {
     UIButton *btn = [UIButton buttonWithType:UIButtonTypeSystem];
     btn.frame = frame;
     [btn setTitle:title forState:UIControlStateNormal];
-    [btn setTitleColor:[UIColor colorWithRed:0.4 green:0.4 blue:0.45 alpha:1.0] forState:UIControlStateNormal];
-    btn.titleLabel.font = [UIFont boldSystemFontOfSize:11];
+    [btn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    btn.titleLabel.font = [UIFont boldSystemFontOfSize:10];
     [btn addTarget:self action:action forControlEvents:UIControlEventTouchUpInside];
     return btn;
 }
 
-- (UIView *)createAimbotContent {
-    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 302, 370)];
-    [view addSubview:[self createControlItemWithTitle:@"Aimbot State" desc:@"تفعيل نظام التنشين التلقائي" y:0 isOn:YES]];
-    [view addSubview:[self createControlItemWithTitle:@"Silent Aim" desc:@"إطلاق نار موجه بدون حركة الكاميرا" y:55 isOn:NO]];
-    
-    UIView *hitboxContainer = [[UIView alloc] initWithFrame:CGRectMake(0, 110, 302, 85)];
-    hitboxContainer.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.025];
-    hitboxContainer.layer.cornerRadius = 8;
-    hitboxContainer.layer.borderWidth = 1.0;
-    hitboxContainer.layer.borderColor = [UIColor colorWithWhite:1.0 alpha:0.05].CGColor;
-    
-    UILabel *hbLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 8, 200, 15)];
-    hbLabel.text = @"Target Hitbox (منطقة الاستهداف)";
-    hbLabel.textColor = [UIColor colorWithRed:0.86 green:0.86 blue:0.86 alpha:1.0];
-    hbLabel.font = [UIFont boldSystemFontOfSize:11];
-    [hitboxContainer addSubview:hbLabel];
-    
-    NSArray *hitboxes = @[@"🎯 Head", @"🎽 Neck", @"🛡️ Chest", @"🦵 Legs"];
-    for (int i = 0; i < 4; i++) {
-        int row = i / 2;
-        int col = i % 2;
-        UIButton *hbBtn = [UIButton buttonWithType:UIButtonTypeSystem];
-        hbBtn.frame = CGRectMake(10 + col * 144, 28 + row * 26, 138, 24);
-        [hbBtn setTitle:hitboxes[i] forState:UIControlStateNormal];
-        hbBtn.titleLabel.font = [UIFont boldSystemFontOfSize:11];
-        hbBtn.layer.cornerRadius = 6;
-        hbBtn.layer.borderWidth = 1.0;
-        
-        if (i == 0) {
-            hbBtn.backgroundColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:0.15];
-            [hbBtn setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] forState:UIControlStateNormal];
-            hbBtn.layer.borderColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0].CGColor;
-        } else {
-            hbBtn.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.04];
-            [hbBtn setTitleColor:[UIColor colorWithRed:0.53 green:0.53 blue:0.6 alpha:1.0] forState:UIControlStateNormal];
-            hbBtn.layer.borderColor = [UIColor colorWithWhite:1.0 alpha:0.08].CGColor;
-        }
-        [hitboxContainer addSubview:hbBtn];
-    }
-    [view addSubview:hitboxContainer];
-    return view;
+// محتوى قسم الأيمبوت (Aimbot)
+- (UIView *)createMainTabContent {
+    UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 290, 310)];
+    [v addSubview:[self createToggle:@"Aimbot Enable" desc:@"تفعيل التنشين التلقائي" y:0]];
+    [v addSubview:[self createToggle:@"Silent Aim" desc:@"إطلاق نار بدون حركة" y:55]];
+    [v addSubview:[self createToggle:@"Auto Fire" desc:@"إطلاق نار تلقائي عند الهدف" y:110]];
+    [v addSubview:[self createToggle:@"Aim Lock" desc:@"تثبيت السلاح على الهدف" y:165]];
+    return v;
 }
 
-- (UIView *)createVisualsContent {
-    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 302, 370)];
-    [view addSubview:[self createControlItemWithTitle:@"ESP Box" desc:@"مربعات رادار الأعداء" y:0 isOn:YES]];
-    [view addSubview:[self createControlItemWithTitle:@"ESP Line" desc:@"خطوط متصلة باللاعبين" y:55 isOn:NO]];
-    return view;
+// محتوى قسم الإسب والرسوميات (ESP)
+- (UIView *)createVisualsTabContent {
+    UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 290, 310)];
+    [v addSubview:[self createToggle:@"ESP Box" desc:@"مربعات أماكن الأعداء" y:0]];
+    [v addSubview:[self createToggle:@"ESP Line" desc:@"خطوط توصيل للأعداء" y:55]];
+    [v addSubview:[self createToggle:@"ESP Distance" desc:@"إظهار المسافة للخصم" y:110]];
+    [v addSubview:[self createToggle:@"Wallhack" desc:@"الرؤية خلف الجدران" y:165]];
+    return v;
 }
 
-- (UIView *)createMiscContent {
-    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 302, 370)];
-    [view addSubview:[self createControlItemWithTitle:@"No Recoil" desc:@"إلغاء ارتداد السلاح تماماً" y:0 isOn:YES]];
-    return view;
+// محتوى قسم الإضافات الشاملة (Misc)
+- (UIView *)createMiscTabContent {
+    UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 290, 310)];
+    [v addSubview:[self createToggle:@"No Recoil" desc:@"إلغاء ارتداد السلاح تماماً" y:0]];
+    [v addSubview:[self createToggle:@"Fast Reload" desc:@"سرعة تعبئة الذخيرة" y:55]];
+    [v addSubview:[self createToggle:@"Speed Hack" desc:@"زيادة سرعة الحركة" y:110]];
+    [v addSubview:[self createToggle:@"FOV Changer" desc:@"تغيير منظور الكاميرا العريض" y:165]];
+    return v;
 }
 
-- (UIView *)createControlItemWithTitle:(NSString *)title desc:(NSString *)desc y:(CGFloat)y isOn:(BOOL)isOn {
-    UIView *item = [[UIView alloc] initWithFrame:CGRectMake(0, y, 302, 48)];
-    item.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.025];
+// عنصر تبديل (Switch Toggle) مع وصف تفصيلي
+- (UIView *)createToggle:(NSString *)title desc:(NSString *)desc y:(CGFloat)y {
+    UIView *item = [[UIView alloc] initWithFrame:CGRectMake(0, y, 290, 45)];
+    item.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.03];
     item.layer.cornerRadius = 8;
-    item.layer.borderWidth = 1.0;
-    item.layer.borderColor = [UIColor colorWithWhite:1.0 alpha:0.05].CGColor;
     
-    UILabel *lblTitle = [[UILabel alloc] initWithFrame:CGRectMake(10, 7, 220, 16)];
-    lblTitle.text = title;
-    lblTitle.textColor = [UIColor colorWithRed:0.86 green:0.86 blue:0.86 alpha:1.0];
-    lblTitle.font = [UIFont boldSystemFontOfSize:12];
+    UILabel *lbl = [[UILabel alloc] initWithFrame:CGRectMake(10, 6, 190, 16)];
+    lbl.text = title;
+    lbl.textColor = [UIColor whiteColor];
+    lbl.font = [UIFont boldSystemFontOfSize:12];
     
-    UILabel *lblDesc = [[UILabel alloc] initWithFrame:CGRectMake(10, 25, 220, 14)];
-    lblDesc.text = desc;
-    lblDesc.textColor = [UIColor colorWithRed:0.33 green:0.33 blue:0.4 alpha:1.0];
-    lblDesc.font = [UIFont systemFontOfSize:9];
+    UILabel *subLbl = [[UILabel alloc] initWithFrame:CGRectMake(10, 23, 190, 14)];
+    subLbl.text = desc;
+    subLbl.textColor = [UIColor grayColor];
+    subLbl.font = [UIFont systemFontOfSize:9];
     
-    UISwitch *sw = [[UISwitch alloc] initWithFrame:CGRectMake(240, 9, 0, 0)];
-    [sw setOn:isOn];
+    UISwitch *sw = [[UISwitch alloc] initWithFrame:CGRectMake(225, 7, 0, 0)];
+    [sw setOn:NO];
     
-    [item addSubview:lblTitle];
-    [item addSubview:lblDesc];
+    [item addSubview:lbl];
+    [item addSubview:subLbl];
     [item addSubview:sw];
     return item;
 }
 
-- (void)showAimbotTab {
-    tabAimbot.hidden = NO; tabVisuals.hidden = YES; tabMisc.hidden = YES;
-    [btnAimbotTab setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] forState:UIControlStateNormal];
-    [btnVisualsTab setTitleColor:[UIColor colorWithRed:0.4 green:0.4 blue:0.45 alpha:1.0] forState:UIControlStateNormal];
-    [btnMiscTab setTitleColor:[UIColor colorWithRed:0.4 green:0.4 blue:0.45 alpha:1.0] forState:UIControlStateNormal];
+// وظائف التنقل بين الأقسام
+- (void)showMain {
+    tabMain.hidden = NO; tabVisuals.hidden = YES; tabMisc.hidden = YES;
+    [btnMainTab setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] forState:UIControlStateNormal];
+    [btnVisualsTab setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [btnMiscTab setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
 }
 
-- (void)showVisualsTab {
-    tabAimbot.hidden = YES; tabVisuals.hidden = NO; tabMisc.hidden = YES;
-    [btnAimbotTab setTitleColor:[UIColor colorWithRed:0.4 green:0.4 blue:0.45 alpha:1.0] forState:UIControlStateNormal];
+- (void)showVisuals {
+    tabMain.hidden = YES; tabVisuals.hidden = NO; tabMisc.hidden = YES;
+    [btnMainTab setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
     [btnVisualsTab setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] forState:UIControlStateNormal];
-    [btnMiscTab setTitleColor:[UIColor colorWithRed:0.4 green:0.4 blue:0.45 alpha:1.0] forState:UIControlStateNormal];
+    [btnMiscTab setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
 }
 
-- (void)showMiscTab {
-    tabAimbot.hidden = YES; tabVisuals.hidden = YES; tabMisc.hidden = NO;
-    [btnAimbotTab setTitleColor:[UIColor colorWithRed:0.4 green:0.4 blue:0.45 alpha:1.0] forState:UIControlStateNormal];
-    [btnVisualsTab setTitleColor:[UIColor colorWithRed:0.4 green:0.4 blue:0.45 alpha:1.0] forState:UIControlStateNormal];
+- (void)showMisc {
+    tabMain.hidden = YES; tabVisuals.hidden = YES; tabMisc.hidden = NO;
+    [btnMainTab setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [btnVisualsTab setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
     [btnMiscTab setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] forState:UIControlStateNormal];
 }
 
-- (void)handleDrag:(UIPanGestureRecognizer *)gesture {
-    UIView *btn = gesture.view;
-    CGPoint translation = [gesture translationInView:btn.superview];
+- (void)dragButton:(UIPanGestureRecognizer *)p {
+    UIView *btn = p.view;
+    CGPoint translation = [p translationInView:btn.superview];
     btn.center = CGPointMake(btn.center.x + translation.x, btn.center.y + translation.y);
-    [gesture setTranslation:CGPointZero inView:btn.superview];
+    [p setTranslation:CGPointZero inView:btn.superview];
 }
 
 - (void)toggleMenu {
@@ -244,7 +224,7 @@
 @end
 
 %ctor {
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [[FinxModMenu sharedInstance] showMenu];
     });
 }
