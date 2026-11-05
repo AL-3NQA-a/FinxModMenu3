@@ -5,14 +5,12 @@
 - (void)showMenu;
 @end
 
-// نافذة مخصصة تسمح بمرور اللمسات للمناطق الشفافة لتجنب تجميد التطبيق
 @interface PassThroughWindow : UIWindow
 @end
 
 @implementation PassThroughWindow
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
     UIView *hitView = [super hitTest:point withEvent:event];
-    // إذا كانت اللمسة على الفراغ الشفاف، اسمح بمرورها للعبة/التطبيق خلفها
     return (hitView == self || hitView == self.rootViewController.view) ? nil : hitView;
 }
 @end
@@ -58,7 +56,7 @@
         rootVC.view.backgroundColor = [UIColor clearColor];
         floatingWindow.rootViewController = rootVC;
         
-        // زر الفينكس العائم (قابل للتحريك والاستجابة)
+        // زر الفينكس العائم (مع تفعيل السحب الصحيح 100%)
         UIButton *floatingBtn = [UIButton buttonWithType:UIButtonTypeCustom];
         floatingBtn.frame = CGRectMake(30, 100, 55, 55);
         floatingBtn.backgroundColor = [UIColor colorWithRed:0.06 green:0.09 blue:0.11 alpha:0.95];
@@ -69,12 +67,13 @@
         floatingBtn.layer.borderColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0].CGColor;
         floatingBtn.layer.borderWidth = 2.0;
         
+        // إيماءة السحب للزر العائم
         UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(dragButton:)];
         [floatingBtn addGestureRecognizer:pan];
         [floatingBtn addTarget:self action:@selector(toggleMenu) forControlEvents:UIControlEventTouchUpInside];
         [rootVC.view addSubview:floatingBtn];
         
-        // إطار القائمة الرئيسية
+        // إطار القائمة الرئيسية (مع إمكانية سحبها أيضاً من الأعلى)
         modMenu = [[UIView alloc] initWithFrame:CGRectMake(95, 100, 320, 420)];
         modMenu.backgroundColor = [UIColor colorWithRed:0.05 green:0.07 blue:0.09 alpha:0.97];
         modMenu.layer.cornerRadius = 16;
@@ -82,11 +81,14 @@
         modMenu.layer.borderColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:0.4].CGColor;
         modMenu.hidden = YES;
         
-        // عنوان القائمة
+        // شريط عنوان القائمة (مخصص لسحب القائمة بالكامل)
         UILabel *title = [[UILabel alloc] initWithFrame:CGRectMake(15, 12, 200, 24)];
         title.text = @"FINX PRO MENU";
         title.textColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0];
         title.font = [UIFont boldSystemFontOfSize:15];
+        title.userInteractionEnabled = YES;
+        UIPanGestureRecognizer *menuPan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(dragMenu:)];
+        [title addGestureRecognizer:menuPan];
         [modMenu addSubview:title];
         
         // زر الإغلاق (X)
@@ -165,7 +167,7 @@
     UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 290, 310)];
     [v addSubview:[self createToggle:@"No Recoil" desc:@"إلغاء ارتداد السلاح تماماً" y:0]];
     [v addSubview:[self createToggle:@"Fast Reload" desc:@"سرعة تعبئة الذخيرة" y:55]];
-    [v addSubview:[self keyWindowToggle:@"Speed Hack" desc:@"زيادة سرعة الحركة" y:110]];
+    [v addSubview:[self createToggle:@"Speed Hack" desc:@"زيادة سرعة الحركة" y:110]];
     [v addSubview:[self createToggle:@"FOV Changer" desc:@"تغيير منظور الكاميرا العريض" y:165]];
     return v;
 }
@@ -194,10 +196,6 @@
     return item;
 }
 
-- (UIView *)keyWindowToggle:(NSString *)title desc:(NSString *)desc y:(CGFloat)y {
-    return [self createToggle:title desc:desc y:y];
-}
-
 - (void)showMain {
     tabMain.hidden = NO; tabVisuals.hidden = YES; tabMisc.hidden = YES;
     [btnMainTab setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] forState:UIControlStateNormal];
@@ -219,11 +217,21 @@
     [btnMiscTab setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] forState:UIControlStateNormal];
 }
 
+// دالة سحب الزر العائم وتحديث إحداثياته بسلاسة
 - (void)dragButton:(UIPanGestureRecognizer *)p {
     UIView *btn = p.view;
     CGPoint translation = [p translationInView:btn.superview];
-    btn.center = CGPointMake(btn.center.x + translation.x, btn.center.y + translation.y);
+    CGPoint newCenter = CGPointMake(btn.center.x + translation.x, btn.center.y + translation.y);
+    btn.center = newCenter;
     [p setTranslation:CGPointZero inView:btn.superview];
+}
+
+// دالة سحب القائمة الرئيسية من شريط العنوان
+- (void)dragMenu:(UIPanGestureRecognizer *)p {
+    CGPoint translation = [p translationInView:modMenu.superview];
+    CGPoint newCenter = CGPointMake(modMenu.center.x + translation.x, modMenu.center.y + translation.y);
+    modMenu.center = newCenter;
+    [p setTranslation:CGPointZero inView:modMenu.superview];
 }
 
 - (void)toggleMenu {
