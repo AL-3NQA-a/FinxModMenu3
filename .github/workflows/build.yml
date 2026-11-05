@@ -1,0 +1,30 @@
+name: Build FinxModMenu3 Tweak
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Theos
+      run: |
+        git clone --recursive https://github.com/theos/theos.git ~/theos
+
+    - name: Compile Package
+      run: |
+        make package
+      env:
+        THEOS: /Users/runner/theos
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: FinxModMenu3-Package
+        path: packages/*.deb
