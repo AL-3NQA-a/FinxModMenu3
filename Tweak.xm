@@ -67,7 +67,7 @@
         
         // تحميل الصورة داخل الزر العائم
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            NSData *imgData = [NSData dataWithContentsOfURL:[NSURL URLWithString:@"https://i.ibb.co/3s6Q1Q9/image.png"][span_0](start_span)[span_0](end_span)];
+            NSData *imgData = [NSData dataWithContentsOfURL:[NSURL URLWithString:@"https://i.ibb.co/3s6Q1Q9/image.png"]];
             if (imgData) {
                 UIImage *btnImage = [UIImage imageWithData:imgData];
                 dispatch_async(dispatch_get_main_queue(), ^{
