@@ -67,7 +67,7 @@
         [header addSubview:titleLabel];
         
         UIButton *closeBtn = [UIButton buttonWithType:UIButtonTypeSystem];
-        closeBtn.frame = CGRectMake(288, 10, 26, 26];
+        closeBtn.frame = CGRectMake(288, 10, 26, 26);
         [closeBtn setTitle:@"✕" forState:UIControlStateNormal];
         [closeBtn setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
         closeBtn.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.05];
@@ -149,7 +149,7 @@
         int row = i / 2;
         int col = i % 2;
         UIButton *hbBtn = [UIButton buttonWithType:UIButtonTypeSystem];
-        hbBtn.frame = CGRectMake(10 + col * 144, 28 + row * 26, 138, 24];
+        hbBtn.frame = CGRectMake(10 + col * 144, 28 + row * 26, 138, 24);
         [hbBtn setTitle:hitboxes[i] forState:UIControlStateNormal];
         hbBtn.titleLabel.font = [UIFont boldSystemFontOfSize:11];
         hbBtn.layer.cornerRadius = 6;
@@ -243,7 +243,6 @@
 
 @end
 
-// حقن القائمة تلقائياً بعد 3 ثوانٍ من تشغيل اللعبة
 %ctor {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [[FinxModMenu sharedInstance] showMenu];
