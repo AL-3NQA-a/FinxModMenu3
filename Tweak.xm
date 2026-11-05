@@ -5,8 +5,20 @@
 - (void)showMenu;
 @end
 
+// نافذة مخصصة تسمح بمرور اللمسات للمناطق الشفافة لتجنب تجميد التطبيق
+@interface PassThroughWindow : UIWindow
+@end
+
+@implementation PassThroughWindow
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+    UIView *hitView = [super hitTest:point withEvent:event];
+    // إذا كانت اللمسة على الفراغ الشفاف، اسمح بمرورها للعبة/التطبيق خلفها
+    return (hitView == self || hitView == self.rootViewController.view) ? nil : hitView;
+}
+@end
+
 @implementation FinxModMenu {
-    UIWindow *floatingWindow;
+    PassThroughWindow *floatingWindow;
     UIView *modMenu;
     UIView *tabMain, *tabVisuals, *tabMisc;
     UIButton *btnMainTab, *btnVisualsTab, *btnMiscTab;
@@ -25,7 +37,6 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         if (floatingWindow) return;
         
-        // التعامل مع نافذة الشاشة الحديثة والطريقة الصحيحة لإنشائها
         UIWindowScene *scene = nil;
         for (UIScene *s in [UIApplication sharedApplication].connectedScenes) {
             if ([s isKindOfClass:[UIWindowScene class]]) {
@@ -35,9 +46,9 @@
         }
         
         if (scene) {
-            floatingWindow = [[UIWindow alloc] initWithWindowScene:scene];
+            floatingWindow = [[PassThroughWindow alloc] initWithWindowScene:scene];
         } else {
-            floatingWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+            floatingWindow = [[PassThroughWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
         }
         
         floatingWindow.windowLevel = UIWindowLevelAlert + 99999;
@@ -47,7 +58,7 @@
         rootVC.view.backgroundColor = [UIColor clearColor];
         floatingWindow.rootViewController = rootVC;
         
-        // زر الفينكس العائم (قابل للتحريك)
+        // زر الفينكس العائم (قابل للتحريك والاستجابة)
         UIButton *floatingBtn = [UIButton buttonWithType:UIButtonTypeCustom];
         floatingBtn.frame = CGRectMake(30, 100, 55, 55);
         floatingBtn.backgroundColor = [UIColor colorWithRed:0.06 green:0.09 blue:0.11 alpha:0.95];
@@ -122,7 +133,6 @@
     });
 }
 
-// دالة إنشاء أزرار التنقل
 - (UIButton *)createTabBtn:(NSString *)title frame:(CGRect)frame action:(SEL)action {
     UIButton *btn = [UIButton buttonWithType:UIButtonTypeSystem];
     btn.frame = frame;
@@ -133,7 +143,6 @@
     return btn;
 }
 
-// محتوى قسم الأيمبوت (Aimbot)
 - (UIView *)createMainTabContent {
     UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 290, 310)];
     [v addSubview:[self createToggle:@"Aimbot Enable" desc:@"تفعيل التنشين التلقائي" y:0]];
@@ -143,7 +152,6 @@
     return v;
 }
 
-// محتوى قسم الإسب والرسوميات (ESP)
 - (UIView *)createVisualsTabContent {
     UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 290, 310)];
     [v addSubview:[self createToggle:@"ESP Box" desc:@"مربعات أماكن الأعداء" y:0]];
@@ -153,17 +161,15 @@
     return v;
 }
 
-// محتوى قسم الإضافات الشاملة (Misc)
 - (UIView *)createMiscTabContent {
     UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 290, 310)];
     [v addSubview:[self createToggle:@"No Recoil" desc:@"إلغاء ارتداد السلاح تماماً" y:0]];
     [v addSubview:[self createToggle:@"Fast Reload" desc:@"سرعة تعبئة الذخيرة" y:55]];
-    [v addSubview:[self createToggle:@"Speed Hack" desc:@"زيادة سرعة الحركة" y:110]];
+    [v addSubview:[self keyWindowToggle:@"Speed Hack" desc:@"زيادة سرعة الحركة" y:110]];
     [v addSubview:[self createToggle:@"FOV Changer" desc:@"تغيير منظور الكاميرا العريض" y:165]];
     return v;
 }
 
-// عنصر تبديل (Switch Toggle) مع وصف تفصيلي
 - (UIView *)createToggle:(NSString *)title desc:(NSString *)desc y:(CGFloat)y {
     UIView *item = [[UIView alloc] initWithFrame:CGRectMake(0, y, 290, 45)];
     item.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.03];
@@ -188,7 +194,10 @@
     return item;
 }
 
-// وظائف التنقل بين الأقسام
+- (UIView *)keyWindowToggle:(NSString *)title desc:(NSString *)desc y:(CGFloat)y {
+    return [self createToggle:title desc:desc y:y];
+}
+
 - (void)showMain {
     tabMain.hidden = NO; tabVisuals.hidden = YES; tabMisc.hidden = YES;
     [btnMainTab setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] forState:UIControlStateNormal];
