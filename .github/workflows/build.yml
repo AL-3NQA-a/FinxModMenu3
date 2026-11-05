@@ -1,4 +1,4 @@
-name: Build FinxModMenu3 Tweak
+name: Build FinxModMenu3 Dylib Direct
 
 on:
   push:
@@ -21,14 +21,14 @@ jobs:
       run: |
         git clone --recursive https://github.com/theos/theos.git ~/theos
 
-    - name: Compile Package
+    - name: Compile Dylib Directly
       run: |
-        make package
+        make
       env:
         THEOS: /Users/runner/theos
 
-    - name: Upload Artifact
+    - name: Upload Dylib Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: FinxModMenu3-Package
-        path: packages/*.deb
+        name: FinxModMenu3-Dylib
+        path: .theos/obj/debug/FinxModMenu3.dylib
