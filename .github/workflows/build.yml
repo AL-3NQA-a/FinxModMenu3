@@ -13,11 +13,20 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Compile Dylib
+    - name: Download iOS SDK
       run: |
-        echo "Starting compilation..."
-        # تجميع ملف الكود المصدري وربطه بمكتبات أبل الأساسية UIKit و Foundation
-        clang -dynamiclib -framework UIKit -framework Foundation -o FinxModMenu.dylib src/main.m
+        git clone --depth 1 https://github.com/hexip/iOS-SDKs.git sdks
+        echo "SDKPATH=$PWD/sdks/iPhoneOS14.5.sdk" >> $GITHUB_ENV
+
+    - name: Compile Dylib for iOS
+      run: |
+        echo "Starting compilation for iOS (arm64)..."
+        clang -dynamiclib \
+              -isysroot "$SDKPATH" \
+              -target arm64-apple-ios14.0 \
+              -framework UIKit \
+              -framework Foundation \
+              -o FinxModMenu.dylib src/main.m
         echo "Compilation finished successfully!"
 
     - name: Upload Artifact
