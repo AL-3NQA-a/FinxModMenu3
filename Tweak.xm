@@ -25,7 +25,7 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         if (floatingWindow) return;
         
-        // التعامل مع نافذة الشاشة الحديثة
+        // التعامل مع نافذة الشاشة الحديثة والطريقة الصحيحة لإنشائها
         UIWindowScene *scene = nil;
         for (UIScene *s in [UIApplication sharedApplication].connectedScenes) {
             if ([s isKindOfClass:[UIWindowScene class]]) {
@@ -35,7 +35,7 @@
         }
         
         if (scene) {
-            floatingWindow = [[UIWindowSceneWindow alloc] initWithWindowScene:scene];
+            floatingWindow = [[UIWindow alloc] initWithWindowScene:scene];
         } else {
             floatingWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
         }
