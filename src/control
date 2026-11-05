@@ -1,9 +1,0 @@
-Package: com.finx.modmenu
-Name: FinxModMenu
-Depends: mobilesubstrate
-Version: 1.0.0
-Architecture: iphoneos-arm
-Description: Finx PRO Engine Mod Menu
-Maintainer: Finx
-Author: Finx
-Section: Tweaks
