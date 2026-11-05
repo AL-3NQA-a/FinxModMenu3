@@ -56,7 +56,7 @@
         rootVC.view.backgroundColor = [UIColor clearColor];
         floatingWindow.rootViewController = rootVC;
         
-        // زر الفينكس العائم بالصورة المحلية (icon.png) وقابل للتحريك
+        // زر الفينكس العائم بالصورة المحلية المرفوعة (image.png) وقابل للتحريك
         UIButton *floatingBtn = [UIButton buttonWithType:UIButtonTypeCustom];
         floatingBtn.frame = CGRectMake(30, 100, 55, 55);
         floatingBtn.backgroundColor = [UIColor colorWithRed:0.06 green:0.09 blue:0.11 alpha:0.95];
@@ -65,11 +65,13 @@
         floatingBtn.layer.borderColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0].CGColor;
         floatingBtn.layer.borderWidth = 2.0;
         
-        // تحميل الصورة محلياً من ملفات حزمة الأداة
-        NSBundle *tweakBundle = [NSBundle bundleForClass:[FinxModMenu class]];
-        UIImage *btnImage = [UIImage imageWithContentsOfFile:[tweakBundle pathForResource:@"icon" ofType:@"png"]];
+        // جلب الصورة المحلية (image.png) من ملفات الأداة
+        NSBundle *bundle = [NSBundle bundleForClass:[FinxModMenu class]];
+        NSString *imgPath = [bundle pathForResource:@"image" ofType:@"png"];
+        UIImage *btnImage = [UIImage imageWithContentsOfFile:imgPath];
+        
         if (!btnImage) {
-            btnImage = [UIImage imageWithContentsOfFile:@"/Library/Application Support/FinxModMenu3/icon.png"];
+            btnImage = [UIImage imageWithContentsOfFile:@"/Library/Application Support/FinxModMenu3/image.png"];
         }
         
         if (btnImage) {
