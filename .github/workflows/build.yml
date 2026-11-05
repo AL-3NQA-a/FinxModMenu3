@@ -1,4 +1,4 @@
-name: Build iOS Dylib
+name: Build FinxModMenu Dylib
 
 on:
   push:
@@ -11,20 +11,17 @@ jobs:
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Set up Environment
+    - name: Compile Dylib
       run: |
-        echo "Setting up build environment..."
-        # هنا يمكنك إضافة أوامر التجميع الخاصة بـ Theos أو Clang
+        echo "Starting compilation..."
+        # تجميع ملف الكود المصدري وربطه بمكتبات أبل الأساسية UIKit و Foundation
+        clang -dynamiclib -framework UIKit -framework Foundation -o FinxModMenu.dylib src/main.m
+        echo "Compilation finished successfully!"
 
-    - name: Compile Source Code
-      run: |
-        # مثال لتجميع ملف الـ dylib إذا كان الكود بلغة C/Objective-C
-        clang -dynamiclib -framework UIKit -framework Foundation -o FinxModMenu.dylib main.m
-        
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: Compiled-Dylib
+        name: FinxModMenu-Dylib
         path: FinxModMenu.dylib
