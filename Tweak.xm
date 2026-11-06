@@ -40,29 +40,18 @@
             return;
         }
         
-        UIWindowScene *scene = nil;
-        for (UIScene *s in [UIApplication sharedApplication].connectedScenes) {
-            if ([s isKindOfClass:[UIWindowScene class]] && s.activationState == UISceneActivationStateForegroundActive) {
-                scene = (UIWindowScene *)s;
-                break;
-            }
-        }
-        if (!scene) {
-            for (UIScene *s in [UIApplication sharedApplication].connectedScenes) {
-                if ([s isKindOfClass:[UIWindowScene class]]) {
-                    scene = (UIWindowScene *)s;
-                    break;
-                }
-            }
+        UIWindow *keyWindow = [UIApplication sharedApplication].keyWindow;
+        if (!keyWindow) {
+            keyWindow = [[UIApplication sharedApplication].windows firstObject];
         }
         
-        if (scene) {
-            floatingWindow = [[PassThroughWindow alloc] initWithWindowScene:scene];
+        if (keyWindow) {
+            floatingWindow = [[PassThroughWindow alloc] initWithFrame:keyWindow.bounds];
         } else {
             floatingWindow = [[PassThroughWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
         }
         
-        floatingWindow.windowLevel = UIWindowLevelAlert + 9999;
+        floatingWindow.windowLevel = UIWindowLevelAlert + 99999;
         floatingWindow.backgroundColor = [UIColor clearColor];
         
         UIViewController *rootVC = [[UIViewController alloc] init];
@@ -71,14 +60,14 @@
         
         // زر التاج الملكي العائم
         UIButton *floatingBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        floatingBtn.frame = CGRectMake(40, 120, 58, 58);
+        floatingBtn.frame = CGRectMake(50, 120, 60, 60);
         floatingBtn.backgroundColor = [UIColor colorWithRed:0.06 green:0.09 blue:0.11 alpha:0.95];
         [floatingBtn setTitle:@"👑" forState:UIControlStateNormal];
-        floatingBtn.titleLabel.font = [UIFont systemFontOfSize:28];
-        floatingBtn.layer.cornerRadius = 29.0;
+        floatingBtn.titleLabel.font = [UIFont systemFontOfSize:30];
+        floatingBtn.layer.cornerRadius = 30.0;
         floatingBtn.layer.masksToBounds = YES;
         floatingBtn.layer.borderColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0].CGColor;
-        floatingBtn.layer.borderWidth = 2.5;
+        floatingBtn.layer.borderWidth = 3.0;
         
         UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(dragButton:)];
         [floatingBtn addGestureRecognizer:pan];
@@ -86,11 +75,11 @@
         [rootVC.view addSubview:floatingBtn];
         
         // إطار القائمة الرئيسية الفخم (PRO ENGINE FINX)
-        modMenu = [[UIView alloc] initWithFrame:CGRectMake(40, 190, 330, 460)];
+        modMenu = [[UIView alloc] initWithFrame:CGRectMake(50, 195, 330, 460)];
         modMenu.backgroundColor = [UIColor colorWithRed:0.04 green:0.06 blue:0.08 alpha:0.98];
         modMenu.layer.cornerRadius = 16;
-        modMenu.layer.borderWidth = 1.2;
-        modMenu.layer.borderColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:0.5].CGColor;
+        modMenu.layer.borderWidth = 1.5;
+        modMenu.layer.borderColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:0.7].CGColor;
         modMenu.hidden = YES;
         
         // عنوان القائمة العلوي
@@ -430,7 +419,7 @@
 @end
 
 %ctor {
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [[FinxModMenu sharedInstance] showMenu];
     });
 }
