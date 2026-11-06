@@ -40,13 +40,17 @@
             return;
         }
         
-        UIWindow *keyWindow = [UIApplication sharedApplication].keyWindow;
-        if (!keyWindow) {
-            keyWindow = [[UIApplication sharedApplication].windows firstObject];
+        // الطريقة الحديثة والآمنة لإيجاد النافذة النشطة بدون أخطاء Deprecated
+        UIWindowScene *activeScene = nil;
+        for (UIScene *scene in [UIApplication sharedApplication].connectedScenes) {
+            if ([scene isKindOfClass:[UIWindowScene class]] && scene.activationState == UISceneActivationStateForegroundActive) {
+                activeScene = (UIWindowScene *)scene;
+                break;
+            }
         }
         
-        if (keyWindow) {
-            floatingWindow = [[PassThroughWindow alloc] initWithFrame:keyWindow.bounds];
+        if (activeScene) {
+            floatingWindow = [[PassThroughWindow alloc] initWithWindowScene:activeScene];
         } else {
             floatingWindow = [[PassThroughWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
         }
