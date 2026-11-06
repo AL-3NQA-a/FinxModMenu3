@@ -100,7 +100,7 @@
         [closeBtn addTarget:self action:@selector(toggleMenu) forControlEvents:UIControlEventTouchUpInside];
         [modMenu addSubview:closeBtn];
         
-        // شريط التنقل بين الأقسام (Tabs) - مرتبة كالصورة: Settings | Misc | Visuals | Aimbot
+        // شريط التنقل بين الأقسام (Tabs)
         UIView *tabBar = [[UIView alloc] initWithFrame:CGRectMake(15, 42, 320, 36)];
         tabBar.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.04];
         tabBar.layer.cornerRadius = 8;
@@ -110,7 +110,6 @@
         btnVisualsTab  = [self createTabBtn:@"VISUALS" frame:CGRectMake(160, 0, 80, 36) action:@selector(showVisuals)];
         btnAimbotTab   = [self createTabBtn:@"AIMBOT" frame:CGRectMake(240, 0, 80, 36) action:@selector(showAimbot)];
         
-        // جعل Aimbot هو القسم الافتراضي النشط
         [btnAimbotTab setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] forState:UIControlStateNormal];
         
         [tabBar addSubview:btnSettingsTab];
@@ -119,7 +118,7 @@
         [tabBar addSubview:btnAimbotTab];
         [modMenu addSubview:tabBar];
         
-        // حاوية محتوى الأقسام مع دعم التمرير (Scroll View) لتسع كل الميزات المذهلة
+        // حاوية محتوى الأقسام
         contentScroll = [[UIScrollView alloc] initWithFrame:CGRectMake(15, 88, 320, 356)];
         contentScroll.showsVerticalScrollIndicator = YES;
         
@@ -154,7 +153,7 @@
     return btn;
 }
 
-// ==================== 1. محتوى قسم AIMBOT الكامل ====================
+// ==================== 1. محتوى قسم AIMBOT ====================
 - (UIView *)createAimbotContent {
     UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 850)];
     CGFloat y = 0;
@@ -165,7 +164,6 @@
     [v addSubview:[self createSlider:@"Aim Assist Strength (قوة الجذب الناعم)" min:0 max:100 current:45 y:y]]; y += 65;
     
     [v addSubview:[self createSectionHeader:@"AIM LOCK / TRIGGER MODE ⚡" y:y]]; y += 32;
-    // أزرار الاختيار المربع (Grid 2x2)
     [v addSubview:[self createGridOptions:@[@"Scope Only 🎯", @"Fire Only 🔥", @"Always On ∞", @"Scope + Fire ⚡"] y:y]]; y += 105;
     [v addSubview:[self createToggle:@"Silent Aim" desc:@"إطلاق نار موجه بدون حركة الكاميرا" y:y]]; y += 52;
     
@@ -188,7 +186,7 @@
     return v;
 }
 
-// ==================== 2. محتوى قسم VISUALS (ESP & RADAR) ====================
+// ==================== 2. محتوى قسم VISUALS ====================
 - (UIView *)createVisualsContent {
     UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 750)];
     CGFloat y = 0;
@@ -196,61 +194,60 @@
     [v addSubview:[self createSectionHeader:@"PLAYER ESP PRO 👤" y:y]]; y += 32;
     [v addSubview:[self createToggle:@"ESP Box Mode" desc:@"رسم إطار مربع (2D / 3D) حول الأعداء" y:y]]; y += 52;
     [v addSubview:[self createToggle:@"ESP Player Health" desc:@"إظهار شريط صحة وطاقة اللاعبين" y:y]]; y += 52;
-    [v addSubview:[self createToggle:@"ESP Skeleton" desc:[cite: 8] stringByAppendingString:@"رسم مفصل وعظام الأعداء"] y:y]]; y += 52; //[cite: 8]
-    [v addSubview:[self createToggle:@"Show Player Names & Team ID" desc:[cite: 8] stringByAppendingString:@"كشف اسم اللاعب ورقم فريقه"] y:y]]; y += 52; //[cite: 8]
-    [v addSubview:[self createToggle:@"ESP Line (Tracer)" desc:[cite: 8] stringByAppendingString:@"خط متصل يتجه لموقع اللاعب"] y:y]]; y += 52; //[cite: 8]
-    [v addSubview:[self createToggle:@"ESP Distance" desc:[cite: 8] stringByAppendingString:@"إظهار مسافة البعد بالأمتار"] y:y]]; y += 62; //[cite: 8]
+    [v addSubview:[self createToggle:@"ESP Skeleton" desc:@"رسم مفصل وعظام الأعداء" y:y]]; y += 52;
+    [v addSubview:[self createToggle:@"Show Player Names & Team ID" desc:@"كشف اسم اللاعب ورقم فريقه" y:y]]; y += 52;
+    [v addSubview:[self createToggle:@"ESP Line (Tracer)" desc:@"خط متصل يتجه لموقع اللاعب" y:y]]; y += 52;
+    [v addSubview:[self createToggle:@"ESP Distance" desc:@"إظهار مسافة البعد بالأمتار" y:y]]; y += 62;
     
     [v addSubview:[self createSectionHeader:@"RADAR & WARNING SYSTEM 📡" y:y]]; y += 32;
-    [v addSubview:[self createToggle:@"Off-Screen Enemy Indicators" desc:[cite: 9] stringByAppendingString:@"أسهم تنبيه على جوانب الشاشة للأعداء الخلفيين"] y:y]]; y += 52; //[cite: 9]
-    [v addSubview:[self createToggle:@"Crosshair Aim Warning" desc:[cite: 9] stringByAppendingString:@"تنبيه عند قيام عدو بالتنشين عليك مباشرة"] y:y]]; y += 62; //[cite: 9]
+    [v addSubview:[self createToggle:@"Off-Screen Enemy Indicators" desc:@"أسهم تنبيه على جوانب الشاشة للأعداء الخلفيين" y:y]]; y += 52;
+    [v addSubview:[self createToggle:@"Crosshair Aim Warning" desc:@"تنبيه عند قيام عدو بالتنشين عليك مباشرة" y:y]]; y += 62;
     
     [v addSubview:[self createSectionHeader:@"VEHICLE ESP 🚗" y:y]]; y += 32;
-    [v addSubview:[self createToggle:@"Show Vehicles" desc:[cite: 9] stringByAppendingString:@"إظهار أماكن السيارات والمركبات"] y:y]]; y += 52; //[cite: 9]
-    [v addSubview:[self createToggle:@"Vehicle Health & Distance" desc:[cite: 9] stringByAppendingString:@"إظهار قوة تحمل المركبة وبعدها"] y:y]]; y += 62; //[cite: 9]
+    [v addSubview:[self createToggle:@"Show Vehicles" desc:@"إظهار أماكن السيارات والمركبات" y:y]]; y += 52;
+    [v addSubview:[self createToggle:@"Vehicle Health & Distance" desc:@"إظهار قوة تحمل المركبة وبعدها" y:y]]; y += 62;
     
     [v addSubview:[self createSectionHeader:@"ITEMS & WEAPON ESP 🎁" y:y]]; y += 32;
-    [v addSubview:[self createToggle:@"Show Drop Weapons" desc:[cite: 9] stringByAppendingString:@"كشف الأسلحة والعتاد الأرضي"] y:y]]; y += 52; //[cite: 9]
-    [v addSubview:[self createToggle:@"Show AirDrop / Crate" desc:[cite: 9] stringByAppendingString:@"كشف صناديق الإمداد والدروب"] y:y]]; y += 52; //[cite: 9]
+    [v addSubview:[self createToggle:@"Show Drop Weapons" desc:@"كشف الأسلحة والعتاد الأرضي" y:y]]; y += 52;
+    [v addSubview:[self createToggle:@"Show AirDrop / Crate" desc:@"كشف صناديق الإمداد والدروب" y:y]]; y += 52;
     
     v.frame = CGRectMake(0, 0, 320, y + 20);
     return v;
 }
 
-// ==================== 3. محتوى قسم MISC (الأداء والتحكم) ====================
+// ==================== 3. محتوى قسم MISC ====================
 - (UIView *)createMiscContent {
     UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 500)];
     CGFloat y = 0;
     
     [v addSubview:[self createSectionHeader:@"CAMERA & VIEW OPTIONS 🖥️" y:y]]; y += 32;
-    [v addSubview:[self createToggle:@"iPad View Mode" desc:[cite: 10] stringByAppendingString:@"تمديد منظور كاميرا السطور الأبعاد العريض"] y:y]]; y += 52; //[cite: 10]
+    [v addSubview:[self createToggle:@"iPad View Mode" desc:@"تمديد منظور كاميرا السطور الأبعاد العريض" y:y]]; y += 52;
     [v addSubview:[self createSlider:@"iPad View Distance (FOV)" min:100 max:150 current:125 y:y]]; y += 65;
     
     [v addSubview:[self createSectionHeader:@"CUSTOM CROSSHAIR & GRAPHIC 🎯" y:y]]; y += 32;
-    [v addSubview:[self createToggle:@"Custom Pro Crosshair" desc:[cite: 10, 12] stringByAppendingString:@"إظهار مؤشر تصليب مخصص في منتصف الشاشة"] y:y]]; y += 52; //[cite: 10, 12]
-    [v addSubview:[self createToggle:@"Night Mode / High Contrast" desc:[cite: 10, 12] stringByAppendingString:@"زيادة التباين لرؤية الأعداء في الظلام"] y:y]]; y += 62; //[cite: 10, 12]
+    [v addSubview:[self createToggle:@"Custom Pro Crosshair" desc:@"إظهار مؤشر تصليب مخصص في منتصف الشاشة" y:y]]; y += 52;
+    [v addSubview:[self createToggle:@"Night Mode / High Contrast" desc:@"زيادة التباين لرؤية الأعداء في الظلام" y:y]]; y += 62;
     
     [v addSubview:[self createSectionHeader:@"GAMEPLAY MODS ⚡" y:y]]; y += 32;
     [v addSubview:[self createSlider:@"Recoil Control Factor (نسبة التحكم بالارتداد)" min:0 max:100 current:80 y:y]]; y += 65;
     [v addSubview:[self createSlider:@"Speed Hack Factor (سرعة الحركة)" min:1 max:3 current:1 y:y]]; y += 65;
-    [v addSubview:[self createToggle:@"Fast Reload" desc:[cite: 12] stringByAppendingString:@"تعبئة الذخيرة بسرعة فائقة"] y:y]]; y += 52; //[cite: 12]
+    [v addSubview:[self createToggle:@"Fast Reload" desc:@"تعبئة الذخيرة بسرعة فائقة" y:y]]; y += 52;
     
     v.frame = CGRectMake(0, 0, 320, y + 20);
     return v;
 }
 
-// ==================== 4. محتوى قسم SETTINGS (الحماية والحفظ) ====================
+// ==================== 4. محتوى قسم SETTINGS ====================
 - (UIView *)createSettingsContent {
     UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 350)];
     CGFloat y = 0;
     
     [v addSubview:[self createSectionHeader:@"PROTECTION & RECORDING 🛡️" y:y]]; y += 32;
-    [v addSubview:[self createToggle:@"Streamproof / Anti-Record" desc: stringByAppendingString:@"إخفاء القائمة والـ ESP تماماً أثناء تصوير الشاشة"] y:y]]; y += 62; //
+    [v addSubview:[self createToggle:@"Streamproof / Anti-Record" desc:@"إخفاء القائمة والـ ESP تماماً أثناء تصوير الشاشة" y:y]]; y += 62;
     
     [v addSubview:[self createSectionHeader:@"MENU CONFIGURATION 💾" y:y]]; y += 32;
-    [v addSubview:[self createToggle:@"Save / Load Custom Config" desc: stringByAppendingString:@"حفظ خياراتك وتلقائيتها عند تشغيل اللعبة"] y:y]]; y += 62; //
+    [v addSubview:[self createToggle:@"Save / Load Custom Config" desc:@"حفظ خياراتك وتلقائيتها عند تشغيل اللعبة" y:y]]; y += 62;
     
-    // أزرار الحفظ والتحميل (Load Config / Save Config)
     UIButton *loadBtn = [UIButton buttonWithType:UIButtonTypeSystem];
     loadBtn.frame = CGRectMake(0, y, 150, 40);
     loadBtn.backgroundColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:0.15];
@@ -279,7 +276,7 @@
     return v;
 }
 
-// ==================== دوال تصميم العناصر المساعدة ====================
+// ==================== دوال تصميم العناصر ====================
 - (UIView *)createSectionHeader:(NSString *)title y:(CGFloat)y {
     UILabel *lbl = [[UILabel alloc] initWithFrame:CGRectMake(2, y, 316, 22)];
     lbl.text = title;
@@ -370,7 +367,7 @@
 // ==================== دوال التنقل بين الأقسام ====================
 - (void)showSettings {
     tabSettings.hidden = NO; tabMisc.hidden = YES; tabVisuals.hidden = YES; tabAimbot.hidden = YES;
-    [self updateTabColors:btnSettings];
+    [self updateTabColors:btnSettingsTab];
     contentScroll.contentSize = tabSettings.frame.size;
 }
 
@@ -400,7 +397,7 @@
     [activeBtn setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] forState:UIControlStateNormal];
 }
 
-// ==================== دوال السحب والإظهار ====================
+// ==================== السحب والإظهار ====================
 - (void)dragButton:(UIPanGestureRecognizer *)p {
     UIView *btn = p.view;
     CGPoint translation = [p translationInView:btn.superview];
