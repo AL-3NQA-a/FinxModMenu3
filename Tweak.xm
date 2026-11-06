@@ -34,13 +34,25 @@
 
 - (void)showMenu {
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (floatingWindow) return;
+        if (floatingWindow) {
+            floatingWindow.hidden = NO;
+            [floatingWindow makeKeyAndVisible];
+            return;
+        }
         
         UIWindowScene *scene = nil;
         for (UIScene *s in [UIApplication sharedApplication].connectedScenes) {
-            if ([s isKindOfClass:[UIWindowScene class]]) {
+            if ([s isKindOfClass:[UIWindowScene class]] && s.activationState == UISceneActivationStateForegroundActive) {
                 scene = (UIWindowScene *)s;
                 break;
+            }
+        }
+        if (!scene) {
+            for (UIScene *s in [UIApplication sharedApplication].connectedScenes) {
+                if ([s isKindOfClass:[UIWindowScene class]]) {
+                    scene = (UIWindowScene *)s;
+                    break;
+                }
             }
         }
         
@@ -50,23 +62,23 @@
             floatingWindow = [[PassThroughWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
         }
         
-        floatingWindow.windowLevel = UIWindowLevelAlert + 99999;
+        floatingWindow.windowLevel = UIWindowLevelAlert + 9999;
         floatingWindow.backgroundColor = [UIColor clearColor];
         
         UIViewController *rootVC = [[UIViewController alloc] init];
         rootVC.view.backgroundColor = [UIColor clearColor];
         floatingWindow.rootViewController = rootVC;
         
-        // زر الفينكس العائم بالتاج الملكي القابل للتحريك
+        // زر التاج الملكي العائم
         UIButton *floatingBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        floatingBtn.frame = CGRectMake(30, 100, 55, 55);
+        floatingBtn.frame = CGRectMake(40, 120, 58, 58);
         floatingBtn.backgroundColor = [UIColor colorWithRed:0.06 green:0.09 blue:0.11 alpha:0.95];
         [floatingBtn setTitle:@"👑" forState:UIControlStateNormal];
-        floatingBtn.titleLabel.font = [UIFont systemFontOfSize:26];
-        floatingBtn.layer.cornerRadius = 27.5;
+        floatingBtn.titleLabel.font = [UIFont systemFontOfSize:28];
+        floatingBtn.layer.cornerRadius = 29.0;
         floatingBtn.layer.masksToBounds = YES;
         floatingBtn.layer.borderColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0].CGColor;
-        floatingBtn.layer.borderWidth = 2.0;
+        floatingBtn.layer.borderWidth = 2.5;
         
         UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(dragButton:)];
         [floatingBtn addGestureRecognizer:pan];
@@ -74,7 +86,7 @@
         [rootVC.view addSubview:floatingBtn];
         
         // إطار القائمة الرئيسية الفخم (PRO ENGINE FINX)
-        modMenu = [[UIView alloc] initWithFrame:CGRectMake(80, 70, 350, 460)];
+        modMenu = [[UIView alloc] initWithFrame:CGRectMake(40, 190, 330, 460)];
         modMenu.backgroundColor = [UIColor colorWithRed:0.04 green:0.06 blue:0.08 alpha:0.98];
         modMenu.layer.cornerRadius = 16;
         modMenu.layer.borderWidth = 1.2;
@@ -82,7 +94,7 @@
         modMenu.hidden = YES;
         
         // عنوان القائمة العلوي
-        UILabel *title = [[UILabel alloc] initWithFrame:CGRectMake(0, 12, 350, 20)];
+        UILabel *title = [[UILabel alloc] initWithFrame:CGRectMake(0, 12, 330, 20)];
         title.text = @"PRO ENGINE FINX";
         title.textColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0];
         title.font = [UIFont boldSystemFontOfSize:14];
@@ -94,21 +106,21 @@
         
         // زر الإغلاق (X)
         UIButton *closeBtn = [UIButton buttonWithType:UIButtonTypeSystem];
-        closeBtn.frame = CGRectMake(315, 10, 26, 26);
+        closeBtn.frame = CGRectMake(295, 10, 26, 26);
         [closeBtn setTitle:@"✕" forState:UIControlStateNormal];
         [closeBtn setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
         [closeBtn addTarget:self action:@selector(toggleMenu) forControlEvents:UIControlEventTouchUpInside];
         [modMenu addSubview:closeBtn];
         
         // شريط التنقل بين الأقسام (Tabs)
-        UIView *tabBar = [[UIView alloc] initWithFrame:CGRectMake(15, 42, 320, 36)];
+        UIView *tabBar = [[UIView alloc] initWithFrame:CGRectMake(10, 42, 310, 36)];
         tabBar.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.04];
         tabBar.layer.cornerRadius = 8;
         
-        btnSettingsTab = [self createTabBtn:@"SETTINGS" frame:CGRectMake(0, 0, 80, 36) action:@selector(showSettings)];
-        btnMiscTab     = [self createTabBtn:@"MISC" frame:CGRectMake(80, 0, 80, 36) action:@selector(showMisc)];
-        btnVisualsTab  = [self createTabBtn:@"VISUALS" frame:CGRectMake(160, 0, 80, 36) action:@selector(showVisuals)];
-        btnAimbotTab   = [self createTabBtn:@"AIMBOT" frame:CGRectMake(240, 0, 80, 36) action:@selector(showAimbot)];
+        btnSettingsTab = [self createTabBtn:@"SETTINGS" frame:CGRectMake(0, 0, 77, 36) action:@selector(showSettings)];
+        btnMiscTab     = [self createTabBtn:@"MISC" frame:CGRectMake(77, 0, 77, 36) action:@selector(showMisc)];
+        btnVisualsTab  = [self createTabBtn:@"VISUALS" frame:CGRectMake(154, 0, 77, 36) action:@selector(showVisuals)];
+        btnAimbotTab   = [self createTabBtn:@"AIMBOT" frame:CGRectMake(231, 0, 77, 36) action:@selector(showAimbot)];
         
         [btnAimbotTab setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] forState:UIControlStateNormal];
         
@@ -119,7 +131,7 @@
         [modMenu addSubview:tabBar];
         
         // حاوية محتوى الأقسام
-        contentScroll = [[UIScrollView alloc] initWithFrame:CGRectMake(15, 88, 320, 356)];
+        contentScroll = [[UIScrollView alloc] initWithFrame:CGRectMake(10, 88, 310, 356)];
         contentScroll.showsVerticalScrollIndicator = YES;
         
         tabAimbot   = [self createAimbotContent];
@@ -155,7 +167,7 @@
 
 // ==================== 1. محتوى قسم AIMBOT ====================
 - (UIView *)createAimbotContent {
-    UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 850)];
+    UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 310, 850)];
     CGFloat y = 0;
     
     [v addSubview:[self createSectionHeader:@"AIMBOT CORE & ASSIST 🎯" y:y]]; y += 32;
@@ -181,14 +193,14 @@
     [v addSubview:[self createSlider:@"Aimbot FOV Size" min:10 max:360 current:120 y:y]]; y += 65;
     [v addSubview:[self createSlider:@"Smoothness Factor" min:1 max:20 current:5 y:y]]; y += 65;
     
-    v.frame = CGRectMake(0, 0, 320, y + 20);
-    contentScroll.contentSize = CGSizeMake(320, y + 20);
+    v.frame = CGRectMake(0, 0, 310, y + 20);
+    contentScroll.contentSize = CGSizeMake(310, y + 20);
     return v;
 }
 
 // ==================== 2. محتوى قسم VISUALS ====================
 - (UIView *)createVisualsContent {
-    UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 750)];
+    UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 310, 750)];
     CGFloat y = 0;
     
     [v addSubview:[self createSectionHeader:@"PLAYER ESP PRO 👤" y:y]]; y += 32;
@@ -211,13 +223,13 @@
     [v addSubview:[self createToggle:@"Show Drop Weapons" desc:@"كشف الأسلحة والعتاد الأرضي" y:y]]; y += 52;
     [v addSubview:[self createToggle:@"Show AirDrop / Crate" desc:@"كشف صناديق الإمداد والدروب" y:y]]; y += 52;
     
-    v.frame = CGRectMake(0, 0, 320, y + 20);
+    v.frame = CGRectMake(0, 0, 310, y + 20);
     return v;
 }
 
 // ==================== 3. محتوى قسم MISC ====================
 - (UIView *)createMiscContent {
-    UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 500)];
+    UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 310, 500)];
     CGFloat y = 0;
     
     [v addSubview:[self createSectionHeader:@"CAMERA & VIEW OPTIONS 🖥️" y:y]]; y += 32;
@@ -233,13 +245,13 @@
     [v addSubview:[self createSlider:@"Speed Hack Factor (سرعة الحركة)" min:1 max:3 current:1 y:y]]; y += 65;
     [v addSubview:[self createToggle:@"Fast Reload" desc:@"تعبئة الذخيرة بسرعة فائقة" y:y]]; y += 52;
     
-    v.frame = CGRectMake(0, 0, 320, y + 20);
+    v.frame = CGRectMake(0, 0, 310, y + 20);
     return v;
 }
 
 // ==================== 4. محتوى قسم SETTINGS ====================
 - (UIView *)createSettingsContent {
-    UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 350)];
+    UIView *v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 310, 350)];
     CGFloat y = 0;
     
     [v addSubview:[self createSectionHeader:@"PROTECTION & RECORDING 🛡️" y:y]]; y += 32;
@@ -249,7 +261,7 @@
     [v addSubview:[self createToggle:@"Save / Load Custom Config" desc:@"حفظ خياراتك وتلقائيتها عند تشغيل اللعبة" y:y]]; y += 62;
     
     UIButton *loadBtn = [UIButton buttonWithType:UIButtonTypeSystem];
-    loadBtn.frame = CGRectMake(0, y, 150, 40);
+    loadBtn.frame = CGRectMake(0, y, 145, 40);
     loadBtn.backgroundColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:0.15];
     [loadBtn setTitle:@"Load Config 📂" forState:UIControlStateNormal];
     [loadBtn setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] forState:UIControlStateNormal];
@@ -259,7 +271,7 @@
     loadBtn.layer.borderColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:0.5].CGColor;
     
     UIButton *saveBtn = [UIButton buttonWithType:UIButtonTypeSystem];
-    saveBtn.frame = CGRectMake(160, y, 160, 40);
+    saveBtn.frame = CGRectMake(155, y, 155, 40);
     saveBtn.backgroundColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:0.25];
     [saveBtn setTitle:@"Save Config 💾" forState:UIControlStateNormal];
     [saveBtn setTitleColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0] forState:UIControlStateNormal];
@@ -272,13 +284,13 @@
     [v addSubview:saveBtn];
     y += 55;
     
-    v.frame = CGRectMake(0, 0, 320, y + 20);
+    v.frame = CGRectMake(0, 0, 310, y + 20);
     return v;
 }
 
 // ==================== دوال تصميم العناصر ====================
 - (UIView *)createSectionHeader:(NSString *)title y:(CGFloat)y {
-    UILabel *lbl = [[UILabel alloc] initWithFrame:CGRectMake(2, y, 316, 22)];
+    UILabel *lbl = [[UILabel alloc] initWithFrame:CGRectMake(2, y, 306, 22)];
     lbl.text = title;
     lbl.textColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0];
     lbl.font = [UIFont boldSystemFontOfSize:11];
@@ -286,21 +298,21 @@
 }
 
 - (UIView *)createToggle:(NSString *)title desc:(NSString *)desc y:(CGFloat)y {
-    UIView *item = [[UIView alloc] initWithFrame:CGRectMake(0, y, 320, 45)];
+    UIView *item = [[UIView alloc] initWithFrame:CGRectMake(0, y, 310, 45)];
     item.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.03];
     item.layer.cornerRadius = 8;
     
-    UILabel *lbl = [[UILabel alloc] initWithFrame:CGRectMake(10, 6, 230, 16)];
+    UILabel *lbl = [[UILabel alloc] initWithFrame:CGRectMake(10, 6, 220, 16)];
     lbl.text = title;
     lbl.textColor = [UIColor whiteColor];
     lbl.font = [UIFont boldSystemFontOfSize:12];
     
-    UILabel *subLbl = [[UILabel alloc] initWithFrame:CGRectMake(10, 23, 230, 14)];
+    UILabel *subLbl = [[UILabel alloc] initWithFrame:CGRectMake(10, 23, 220, 14)];
     subLbl.text = desc;
     subLbl.textColor = [UIColor grayColor];
     subLbl.font = [UIFont systemFontOfSize:9];
     
-    UISwitch *sw = [[UISwitch alloc] initWithFrame:CGRectMake(255, 7, 0, 0)];
+    UISwitch *sw = [[UISwitch alloc] initWithFrame:CGRectMake(245, 7, 0, 0)];
     [sw setOn:NO];
     [sw setOnTintColor:[UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0]];
     
@@ -311,22 +323,22 @@
 }
 
 - (UIView *)createSlider:(NSString *)title min:(float)min max:(float)max current:(float)current y:(CGFloat)y {
-    UIView *item = [[UIView alloc] initWithFrame:CGRectMake(0, y, 320, 55)];
+    UIView *item = [[UIView alloc] initWithFrame:CGRectMake(0, y, 310, 55)];
     item.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.03];
     item.layer.cornerRadius = 8;
     
-    UILabel *lbl = [[UILabel alloc] initWithFrame:CGRectMake(10, 6, 220, 18)];
+    UILabel *lbl = [[UILabel alloc] initWithFrame:CGRectMake(10, 6, 210, 18)];
     lbl.text = title;
     lbl.textColor = [UIColor whiteColor];
     lbl.font = [UIFont boldSystemFontOfSize:11];
     
-    UILabel *valLbl = [[UILabel alloc] initWithFrame:CGRectMake(235, 6, 75, 18)];
+    UILabel *valLbl = [[UILabel alloc] initWithFrame:CGRectMake(225, 6, 75, 18)];
     valLbl.text = [NSString stringWithFormat:@"%.0f", current];
     valLbl.textColor = [UIColor colorWithRed:0.0 green:1.0 blue:0.67 alpha:1.0];
     valLbl.font = [UIFont boldSystemFontOfSize:11];
     valLbl.textAlignment = NSTextAlignmentRight;
     
-    UISlider *slider = [[UISlider alloc] initWithFrame:CGRectMake(10, 28, 300, 20)];
+    UISlider *slider = [[UISlider alloc] initWithFrame:CGRectMake(10, 28, 290, 20)];
     slider.minimumValue = min;
     slider.maximumValue = max;
     slider.value = current;
@@ -339,8 +351,8 @@
 }
 
 - (UIView *)createGridOptions:(NSArray *)options y:(CGFloat)y {
-    UIView *item = [[UIView alloc] initWithFrame:CGRectMake(0, y, 320, 95)];
-    CGFloat w = 152;
+    UIView *item = [[UIView alloc] initWithFrame:CGRectMake(0, y, 310, 95)];
+    CGFloat w = 148;
     CGFloat h = 40;
     
     for (int i = 0; i < options.count; i++) {
@@ -418,7 +430,7 @@
 @end
 
 %ctor {
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [[FinxModMenu sharedInstance] showMenu];
     });
 }
